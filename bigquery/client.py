@@ -5,6 +5,7 @@ from collections import defaultdict
 from datetime import datetime, timedelta
 from hashlib import sha256
 from io import StringIO
+from io import BytesIO
 from time import sleep, time
 from functools import reduce
 
@@ -133,9 +134,16 @@ def get_client(project_id=None, credentials=None,
         except NameError:
             # python3 -- private_key is already unicode
             pass
+
+        stream = None
+        if isinstance(private_key, bytes):
+            stream = BytesIO(private_key)
+        else:
+            stream = StringIO(private_key)
+
         credentials = _credentials().from_p12_keyfile_buffer(
             service_account,
-            StringIO(private_key),
+            stream,
             scopes=scope)
 
     if json_key_file:
